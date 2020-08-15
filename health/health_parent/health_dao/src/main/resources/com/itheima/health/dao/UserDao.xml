@@ -1,0 +1,90 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.health.dao.UserDao">
+    <insert id="add" parameterType="com.itheima.health.pojo.User">
+        insert into t_user (username,password,telephone) values
+        (#{username},#{password},#{telephone})
+        <selectKey keyProperty="id" resultType="int" order="AFTER">
+            select last_insert_id()
+        </selectKey>
+    </insert>
+    <insert id="addRoleRelation">
+        insert into t_user_role (user_id,role_id) values (#{id},#{rolesId})
+    </insert>
+    <update id="update" parameterType="com.itheima.health.pojo.User">
+        update t_user u
+        SET u.`username` = #{username},
+        <if test="password != '' and password !=null">
+            u.`password` = password,
+        </if>
+        u.`telephone` = #{telephone}
+        where id = #{id}
+    </update>
+    <delete id="deleteCondition" parameterType="int">
+        delete from t_user_role where t_user_role.user_id = #{id}
+    </delete>
+    <delete id="deleteUser" parameterType="int">
+        delete from t_user where id = #{id}
+    </delete>
+    <select id="findByUsername" parameterType="String" resultMap="userRolePermissionMap">
+        select u.id,u.username,u.password,
+               ur.role_id, r.keyword role_keyword, r.name role_name,
+               rp.permission_id, p.keyword permission_keyword, p.name permission_name
+        From
+            t_user u, t_user_role ur, t_role r,
+            t_role_permission rp, t_permission p
+        where u.id=ur.user_id and ur.role_id=r.id
+        and r.id=rp.role_id and rp.permission_id=p.id
+        and u.username=#{username}
+    </select>
+    <select id="findCondition" resultMap="findConditionMap">
+    SELECT
+          t_user.`id`,
+          t_user.`birthday`,
+          t_user.`gender`,
+          t_user.`password`,
+          t_user.`telephone`,
+          t_user.`username`,
+          t_role.`id` AS rid,
+          t_role.`name`
+    FROM
+          t_user_role,
+          t_user,
+          t_role
+     WHERE t_user.`id` = t_user_role.`user_id`
+    AND t_user_role.`role_id` = t_role.`id`
+    </select>
+    <select id="findById" resultMap="findConditionMap" parameterType="int">
+          SELECT u.id,u.username,u.`birthday`,u.telephone,ur.role_id rid
+		 FROM t_user u,t_user_role ur WHERE u.`id` = ur.user_id AND u.`id` = #{id}
+    </select>
+    <resultMap id="findConditionMap" type="com.itheima.health.pojo.User">
+        <id column="id" property="id"/>
+        <result column="username" property="username"/>
+        <result column="birthday" property="birthday"/>
+        <result column="telephone" property="telephone"/>
+        <collection property="roles" ofType="com.itheima.health.pojo.Role">
+            <id column="rid" property="id"/>
+            <result column="name" property="name"/>
+        </collection>
+    </resultMap>
+
+    <resultMap id="userRolePermissionMap" type="User">
+        <id property="id" column="id"></id>
+        <result property="username" column="username"/>
+        <result property="password" column="password"/>
+        <collection property="roles" ofType="Role">
+            <id property="id" column="role_id"/>
+            <result property="keyword" column="role_keyword"/>
+            <result property="name" column="role_name"/>
+            <collection property="permissions" ofType="Permission">
+                <id property="id" column="permission_id"/>
+                <result property="keyword" column="permission_keyword"/>
+                <result property="name" column="permission_name"/>
+            </collection>
+        </collection>
+    </resultMap>
+</mapper>

@@ -1,0 +1,56 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.health.dao.RoleDao">
+    <insert id="add">
+        <selectKey resultType="integer" order="AFTER" keyProperty="id">
+            select last_insert_id()
+        </selectKey>
+        insert into t_role(`name`,keyword,description) values(#{name},#{keyword},#{description})
+    </insert>
+    <insert id="addRoleAndMenu">
+        insert into t_role_menu(role_id,menu_id) values (#{rid},#{mid})
+    </insert>
+    <insert id="addRoleAndPermission">
+         insert into t_role_permission(role_id,permission_id) values (#{rid},#{pid})
+    </insert>
+    <update id="update">
+        update t_role set `name`=#{name},keyword=#{keyword},description=#{description} where id=#{id}
+    </update>
+
+    <delete id="deleteRoleAndMenuByRoleId">
+        delete from t_role_menu where role_id=#{id}
+    </delete>
+    <delete id="deleteRoleAndPermissionByRoleId">
+        delete from t_role_permission where role_id=#{id}
+    </delete>
+    <delete id="delete">
+         delete from t_role where id=#{id}
+    </delete>
+
+
+    <select id="findById" resultMap="rolemap">
+        SELECT r.*,m.id mid,p.id pid FROM t_role r LEFT JOIN t_role_menu rm ON r.`id`= rm.role_id LEFT JOIN t_menu m ON m.`id`=rm.`menu_id`
+                        LEFT JOIN t_role_permission rp ON r.`id`=rp.`role_id` LEFT JOIN t_permission p ON rp.`permission_id`= p.`id`
+                        WHERE r.`id`=#{id};
+    </select>
+    <select id="relevance" resultType="java.lang.Integer">
+        select count(1) from t_user_role where role_id=#{id}
+    </select>
+    <select id="findPage" resultType="com.itheima.health.pojo.Role">
+        select * from t_role <if test="value!=null and value.length>0">
+        where `name` like #{value} or keyword like #{value}</if>
+    </select>
+    <resultMap id="rolemap" type="com.itheima.health.pojo.Role">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="keyword" column="keyword"></result>
+        <result property="description" column="description"></result>
+        <collection property="menus" ofType="com.itheima.health.pojo.Menu">
+            <id property="id" column="mid"></id>
+        </collection>
+        <collection property="permissions" ofType="com.itheima.health.pojo.Permission">
+            <id property="id" column="pid"></id>
+        </collection>
+    </resultMap>
+</mapper>

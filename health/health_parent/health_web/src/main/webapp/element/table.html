@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>表格</title>
+    <script src="../js/vue.js"></script>
+    <link rel="stylesheet" href="../plugins/elementui/index.css">
+    <script src="../plugins/elementui/index.js"></script>
+</head>
+<body>
+<div id="app">
+    <el-table :data="tableData" border style="width: 100%">
+        <el-table-column prop="date" label="日期" width="180"></el-table-column>
+        <el-table-column prop="name" label="姓名" width="180"></el-table-column>
+        <el-table-column prop="address" label="地址"></el-table-column>
+    </el-table>
+<!--
+size-change: 每页显示大小 变更时触发 methods中的handleSizeChange
+current-change: 当前页码变更时触发 methods中handleCurrentChange
+current-page: 当前页码
+page-sizes: 每页大小的选择项
+page-size: 当前设置的每页大小, 它必须在page-sizes中有
+layout：分页工具栏显示哪些内容
+total: 总记录数
+  -->
+    <el-pagination
+            @size-change="handleSizeChange"
+            @current-change="handleCurrentChange"
+            :current-page="currentPage4"
+            :page-sizes="[10, 200, 300, 400]"
+            :page-size="pageSize"
+            layout="total, sizes, prev, pager, next, jumper"
+            :total="400">
+    </el-pagination>
+</div>
+<script>
+    var vue = new Vue({
+        el: '#app',
+        data() {
+            return {
+                currentPage4: 4,
+                pageSize:10,
+                tableData: []
+            }
+        },
+        created(){
+            //
+            this.tableData=[{
+                date: '2016-05-02',
+                name: '王小虎-----',
+                address: '上海市普陀区金沙江路 1518 弄'
+            }, {
+                date: '2016-05-04',
+                name: '王小虎aaaa',
+                address: '上海市普陀区金沙江路 1517 弄'
+            }, {
+                date: '2016-05-01',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1519 弄'
+            }, {
+                date: '2016-05-03',
+                name: '王小虎',
+                address: '上海市普陀区金沙江路 1516 弄'
+            }]
+        },
+        methods: {
+            handleSizeChange(val) {
+                console.log(`每页 ${val} 条`);
+            },
+            handleCurrentChange(val) {
+                console.log(`当前页: ${val}`);
+            }
+        }
+    });
+</script>
+</body>
+</html>

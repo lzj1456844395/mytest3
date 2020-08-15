@@ -1,0 +1,37 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:context="http://www.springframework.org/schema/context"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans.xsd http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context.xsd">
+
+    <!--  自定义的类 注册到spring容器  -->
+    <context:component-scan base-package="com.itheima.health.job"/>
+
+    <!--  任务策略  -->
+    <bean id="jobDetail" class="org.springframework.scheduling.quartz.MethodInvokingJobDetailFactoryBean">
+        <property name="targetObject" ref="clearOrderSettingJob"/>
+        <property name="targetMethod" value="clearOrderSetting"/>
+    </bean>
+<!--    &lt;!&ndash;  触发器  &ndash;&gt;-->
+<!--    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">-->
+<!--        &lt;!&ndash;  测试      <property name="cronExpression" value="0/30 * * * * ?"/>&ndash;&gt;-->
+<!--        <property name="cronExpression" value="0 0 4 * * ?"/>-->
+<!--        <property name="jobDetail" ref="jobDetail"/>-->
+<!--    </bean>-->
+    <!--    清理过期预约数据表的触发器-->
+    <bean id="trigger" class="org.springframework.scheduling.quartz.CronTriggerFactoryBean">
+<!--        //十秒测试-->
+<!--        <property name="cronExpression" value="0/30 * * * * ?"0 0 2 l * ? />-->
+        <property name="cronExpression" value="0/10 * * * * ?"/>
+        <property name="jobDetail" ref="jobDetail"/>
+    </bean>
+    <!--  调度容器  -->
+    <bean class="org.springframework.scheduling.quartz.SchedulerFactoryBean">
+        <property name="triggers">
+            <list>
+                <ref bean="trigger"/>
+            </list>
+        </property>
+    </bean>
+    <import resource="classpath:springmvc-jobs.xml"/>
+</beans>

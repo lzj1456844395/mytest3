@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <!-- 页面meta -->
+        <meta charset="utf-8">
+        <meta http-equiv="X-UA-Compatible" content="IE=edge">
+        <title>传智健康</title>
+        <meta name="description" content="传智健康">
+        <meta name="keywords" content="传智健康">
+        <meta content="width=device-width,initial-scale=1,maximum-scale=1,user-scalable=no" name="viewport">
+        <!-- 引入样式 -->
+        <link rel="stylesheet" href="../css/style.css">
+        <script src="../plugins/echarts.js"></script>
+        <!--elementui 组件-->
+        <link rel="stylesheet" href="../plugins/elementui/index.css">
+        <script src="../js/vue.js"></script>
+        <script src="../plugins/elementui/index.js"></script>
+    </head>
+    <body class="hold-transition">
+        <div id="app">
+            <div class="content-header">
+                <h1>统计分析<small>会员数量</small></h1>
+                <el-breadcrumb separator-class="el-icon-arrow-right" class="breadcrumb">
+                    <el-breadcrumb-item :to="{ path: '/' }">首页</el-breadcrumb-item>
+                    <el-breadcrumb-item>统计分析</el-breadcrumb-item>
+                    <el-breadcrumb-item>会员数量</el-breadcrumb-item>
+                </el-breadcrumb>
+            </div>
+            <div class="app-container">
+                <div class="box">
+                    <br>
+                    <!--添加日期选择器-->
+                    <div class="block"  align="center">
+                        <span class="demonstration">指定时间段展示</span>
+                        <el-date-picker
+                                v-model="value2"
+                                type="daterange"
+                                align="right"
+                                unlink-panels
+                                range-separator="至"
+                                start-placeholder="开始日期"
+                                end-placeholder="结束日期"
+                                :picker-options="pickerOptions"
+                                @change="fun01"
+                        >
+                        </el-date-picker>
+                    </div>
+                    <br>
+                    <br>
+                    <!-- 为 ECharts 准备一个具备大小（宽高）的 DOM -->
+                    <div id="chart1" style="height:600px;" ></div>
+                </div>
+            </div>
+        </div>
+    </body>
+    <!-- 引入组件库 -->
+    <script src="../js/axios-0.18.0.js"></script>
+    <script type="text/javascript">
+        //----------------------------------
+       let vv=new Vue({
+           el:"#app",
+           data:{
+               pickerOptions: {
+                   disabledDate(time) {
+                       return time.getTime() > Date.now() - 8.64e6;//如果没有后面的-8.64e6就是不可以选择今天的
+                   },
+                   shortcuts: [{
+                       text: '本月',
+                       onClick(picker) {
+                           const end = new Date();
+                           picker.$emit('pick', [end.setDate(1), new Date()]);
+                       }
+                   }, {
+                       text: '今年至今',
+                       onClick(picker) {
+                           const end = new Date();
+                           const start = new Date(new Date().getFullYear(), 0);
+                           picker.$emit('pick', [start, end]);
+                       }
+                   }, {
+                       text: '最近六个月',
+                       onClick(picker) {
+                           const end = new Date();
+                           const start = new Date();
+                           start.setMonth(start.getMonth() - 6);
+                           picker.$emit('pick', [start, end]);
+                       },
+                   },
+                       {
+                           text: '最近一年',
+                           onClick(picker) {
+                               const end = new Date();
+                               const start = new Date();
+                               start.setMonth(start.getMonth() - 12);
+                               picker.$emit('pick', [start, end]);
+                           },
+                       },
+                       {
+                           text: '最近二年',
+                           onClick(picker) {
+                               const end = new Date();
+                               const start = new Date();
+                               start.setMonth(start.getMonth() - 24);
+                               picker.$emit('pick', [start, end]);
+                           },
+                       }
+                   ]
+               },
+               value2: '',
+               xAxis:[],
+               yAxis:[]
+
+           },
+           created(){
+               let date = new Date();
+               let day=date.getDate();
+               let month = date.getMonth()+1;
+               let fullYear = date.getFullYear();
+               this.value2=[(fullYear-1)+"-"+month+"-"+day,fullYear+"-"+month+"-"+day];
+           },
+           methods:{
+               fun01:function () {
+                   axios.post("/report/getMemberReportPro.do",this.value2).then(res=>{
+                       if (res.data.flag) {
+                           this.xAxis=res.data.data.arrx;
+                           this.yAxis=res.data.data.arry;
+
+                           myChart1.dispose();
+                           var myChart2 = echarts.init(document.getElementById('chart1'));
+                           myChart2.setOption(
+                               {
+                                   title: {
+                                       text: '会员数量'
+                                   },
+                                   tooltip: {},
+                                   legend: {
+                                       data: ['会员数量']
+                                   },
+                                   xAxis: {
+                                       //data: res.data.data.months
+                                       data:vv.xAxis
+                                   },
+                                   yAxis: {
+                                       type: 'value'
+                                   },
+                                   series: [{
+                                       name: '会员数量',
+                                       type: 'line',
+                                       //data: res.data.data.memberCount
+                                       data:vv.yAxis
+                                   }]
+                               });
+                       }else {
+                           this.$message.error(res.data.message);
+                       }
+                   });
+
+               },
+           }
+       });
+        //----------------------------------
+
+        // 基于准备好的dom，初始化echarts实例
+        var myChart1 = echarts.init(document.getElementById('chart1'));
+
+        // 使用刚指定的配置项和数据显示图表。
+        //myChart.setOption(option);
+
+        //默认访问一年
+        let sta = new Date();
+        sta.setFullYear(sta.getFullYear()-1);
+        let arr=[sta,new Date()];
+
+        axios.post("/report/getMemberReportPro.do",arr).then((res)=>{
+            if(res.data.flag) {
+                myChart1.setOption(
+                    {
+                        title: {
+                            text: '会员数量'
+                        },
+                        tooltip: {},
+                        legend: {
+                            data: ['会员数量']
+                        },
+                        xAxis: {
+                            //data: res.data.data.months
+                            data:res.data.data.arrx,
+                        },
+                        yAxis: {
+                            type: 'value'
+                        },
+                        series: [{
+                            name: '会员数量',
+                            type: 'line',
+                            //data: res.data.data.memberCount
+                            data:res.data.data.arry,
+                        }]
+                    });
+           }else{
+                this.$message.error(res.data.message);
+            }
+       });
+    </script>
+</html>

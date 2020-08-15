@@ -1,0 +1,13 @@
+*.iml
+health_parent/.idea/
+health_parent/health_common/target/
+health_parent/health_dao/target/
+health_parent/health_interface/target/
+health_parent/health_mobile/target/
+health_parent/health_pojo/target/
+health_parent/health_service/target/
+health_parent/health_web/target/
+health_parent/health_jobs/target/
+README.en.md
+README.md
+.idea

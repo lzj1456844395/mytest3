@@ -1,0 +1,19 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+       xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+       xmlns:dubbo="http://code.alibabatech.com/schema/dubbo" xmlns:mvc="http://www.springframework.org/schema/mvc"
+       xsi:schemaLocation="http://www.springframework.org/schema/beans
+                  http://www.springframework.org/schema/beans/spring-beans.xsd
+                  http://code.alibabatech.com/schema/dubbo
+                  http://code.alibabatech.com/schema/dubbo/dubbo.xsd ">
+    <!-- 指定应用名称 -->
+    <dubbo:application name="health_jobs"/>
+    <!--指定服务注册中心地址-->
+    <dubbo:registry address="zookeeper://127.0.0.1:2181"/>
+    <!--批量扫描 dubbo2.6.0下，mvc不需要再扫controller
+        2.6.2 则mvc要扫一次controller
+        扫到SpringSecurityUserService
+    -->
+    <dubbo:annotation package="com.itheima.health.job"/>
+    <dubbo:consumer timeout="600000" check="false"/>
+</beans>

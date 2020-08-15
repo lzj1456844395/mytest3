@@ -1,0 +1,76 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.health.dao.MenuDao">
+    <insert id="add">
+        insert into t_menu(`name`,linkUrl,path,priority,description,`level`,parentMenuId) values
+        (#{name},#{linkUrl},#{path},#{priority},#{description},#{level},#{parentMenuId})
+    </insert>
+    <delete id="deleteById">
+        delete from t_menu where id=#{id}
+    </delete>
+    <select id="findMenuByName" parameterType="String" resultType="menu">
+        select m.*
+        FROM t_user u,t_menu m,t_role_menu rm ,t_user_role ur
+        where u.id=ur.user_id and ur.role_id=rm.role_id and rm.menu_id=m.id
+        and u.username=#{username}
+        order by m.level,m.path
+    </select>
+
+    <resultMap id="menumap" type="com.itheima.health.pojo.Menu">
+        <id property="id" column="id"></id>
+        <result property="name" column="name"></result>
+        <result property="name" column="name"></result>
+        <result property="linkUrl" column="linkUrl"></result>
+        <result property="description" column="description"></result>
+        <collection property="children" ofType="com.itheima.health.pojo.Menu">
+            <id property="id" column="pid"></id>
+            <result property="name" column="pname"></result>
+            <result property="linkUrl" column="plinkUrl"></result>
+            <result property="description" column="pdescription"></result>
+        </collection>
+    </resultMap>
+    <update id="edit">
+        update t_menu set
+            `name`=#{name},
+            linkUrl=#{linkUrl},
+            path=#{path},
+            priority=#{priority},
+            description=#{description},
+            icon=#{icon},
+            `level`=#{level},
+            parentMenuId=#{parentMenuId}
+            where id=#{id}
+    </update>
+    <select id="findAll" resultMap="menumap">
+        SELECT t1.id,t1.name,t1.linkUrl,t1.description,t2.id pid,t2.name pname,t2.linkUrl plinkUrl,t2.description pdescription
+        FROM t_menu t1 left JOIN t_menu t2 ON t2.parentMenuId=t1.id WHERE t1.level=1
+        ORDER BY t2.path
+    </select>
+
+    <select id="findoneMenu" resultType="com.itheima.health.pojo.Menu">
+        SELECT * FROM t_menu WHERE id=#{id};
+    </select>
+    <select id="fuAllMenu" resultType="com.itheima.health.pojo.Menu">
+        SELECT id,`name` FROM t_menu WHERE `level`=1;
+    </select>
+    <select id="findParentMenuId" resultType="java.lang.Integer">
+        select id from t_menu where parentMenuId=#{parentMenuId}
+    </select>
+    <select id="findMaxPath" resultType="java.lang.Integer">
+        select max(path) from t_menu where `level`=1
+    </select>
+    <select id="findMaxPriority" resultType="java.lang.Integer">
+         select max(priority) from t_menu where `level`=1
+    </select>
+    <select id="findMax2Path" resultType="java.lang.String">
+        select max(path) from t_menu where `level`=2 and parentMenuId=#{id}
+    </select>
+    <select id="findMax2Priority" resultType="java.lang.Integer">
+        select max(priority) from t_menu where `level`=2 and parentMenuId=#{id}
+    </select>
+
+
+</mapper>

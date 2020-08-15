@@ -1,0 +1,75 @@
+<?xml version="1.0" encoding="UTF-8" ?>
+<!DOCTYPE mapper
+        PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN"
+        "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+
+<mapper namespace="com.itheima.health.dao.CheckItemDao">
+
+    <select id="findAll" resultType="checkitem">
+        select * from t_checkitem
+    </select>
+
+    <insert id="add" parameterType="checkitem">
+        insert into t_checkitem (code,name,sex,age,price,type,remark,attention)
+        values(#{code},#{name},#{sex},#{age},#{price},#{type},#{remark},#{attention})
+    </insert>
+
+<!--  Ognl表达式  -->
+    <select id="findByCondition" resultType="Checkitem" parameterType="String">
+        select * From t_checkitem
+        <if test="value !=null and value.length > 0">
+            where code like #{queryString} or name like #{queryString}
+        </if>
+    </select>
+
+    <select id="findByCondition2" resultType="Checkitem" parameterType="String">
+        select * From t_checkitem
+        <if test="_parameter !=null and _parameter.length > 0">
+            where code like #{queryString} or name like #{queryString}
+        </if>
+    </select>
+<!--
+查询优化
+select count(1) from t_checkitem; 1
+ 使用人混淆
+select count(100) from t_checkitem; 1
+select count('abc1') from t_checkitem; 1
+上面三条语句相对而言，查询速度最快
+
+相对而言慢一丢丢，原因，要解析列名是否在表中存在
+select count(id) from t_checkitem; 2
+最慢，原因，要解析*含义，列表表中所有的列
+select count(*) from t_checkitem;  3
+-->
+    <select id="findCountByCheckItemId" parameterType="int" resultType="int">
+        select count(1) from t_checkgroup_checkitem where checkitem_id=#{id}
+    </select>
+
+    <delete id="deleteById" parameterType="int">
+        delete from t_checkitem where id=#{id}
+    </delete>
+
+    <select id="findById" parameterType="int" resultType="checkitem">
+        select * From t_checkitem where id=#{id}
+    </select>
+
+    <update id="update" parameterType="checkitem">
+        update t_checkitem
+        set
+            code=#{code},
+            name=#{name},
+            sex=#{sex},
+            age=#{age},
+            price=#{price},
+            type=#{type},
+            remark=#{remark},
+            attention=#{attention}
+        where id=#{id}
+    </update>
+
+    <!--根据检查组id查询检查项信息-->
+    <select id="findCheckItemListById" resultType="com.itheima.health.pojo.CheckItem">
+        select * from t_checkitem  where id
+        in (select checkitem_id from t_checkgroup_checkitem where checkgroup_id=#{id})
+    </select>
+</mapper>
